@@ -1,0 +1,33 @@
+# Build
+/target/
+*.jar
+*.war
+*.ear
+*.class
+
+# IDE
+.idea/
+.vscode/
+.settings/
+.classpath
+.project
+*.iml
+*.ipr
+*.iws
+
+# Maven
+pom.xml.tag
+pom.xml.releaseBackup
+.releaseBackups
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Local env / secrets
+.env
+.env.local
+*.env
