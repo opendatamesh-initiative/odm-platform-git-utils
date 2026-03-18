@@ -1,4 +1,4 @@
-name: odm-platform-git-utils CI
+name: git-utils CI
 on:
   push:
     branches:

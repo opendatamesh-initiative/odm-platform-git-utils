@@ -1,11 +1,11 @@
-# ODM Platform Git Utils
+# Git Utils
 
-Open Data Mesh Platform Git utilities: a Java library providing a unified abstraction over Git hosting providers (
+Git utilities: a Java library providing a unified abstraction over Git hosting providers (
 GitHub, GitLab, Bitbucket, Azure DevOps) and optional REST client helpers.
 
 <!-- TOC -->
 
-* [ODM Platform Git Utils](#odm-platform-git-utils)
+* [Git Utils](#git-utils)
     * [Overview](#overview)
     * [Prerequisites](#prerequisites)
     * [Building the Project](#building-the-project)
@@ -44,10 +44,10 @@ own factory to create provider instances (using their own provider-type enum and
 
 ```bash
 # Clone the repository
-git clone https://github.com/opendatamesh-initiative/odm-platform-git-utils.git
+git clone https://github.com/opendatamesh-initiative/git-utils.git
 
 # Navigate to project directory
-cd odm-platform-git-utils
+cd git-utils
 
 # Build the project
 mvn clean install
@@ -66,7 +66,7 @@ Add the library to your project:
 
 <dependency>
     <groupId>org.opendatamesh</groupId>
-    <artifactId>odm-platform-git-utils</artifactId>
+    <artifactId>git-utils</artifactId>
     <version>1.0.0</version>
 </dependency>
 ```
@@ -82,7 +82,7 @@ If the artifact is published to GitHub Packages, add the repository (and matchin
     <repository>
         <id>odm-git-utils-repo</id>
         <name>GitHub Packages for ODM Platform Git Utils</name>
-        <url>https://maven.pkg.github.com/opendatamesh-initiative/odm-platform-git-utils</url>
+        <url>https://maven.pkg.github.com/opendatamesh-initiative/git-utils</url>
     </repository>
 </repositories>
 ```
@@ -136,4 +136,4 @@ This project is licensed under the Apache License 2.0 — see the [LICENSE](LICE
 ## Support
 
 For support, please open an issue in
-the [GitHub repository](https://github.com/opendatamesh-initiative/odm-platform-git-utils).
+the [GitHub repository](https://github.com/opendatamesh-initiative/git-utils).

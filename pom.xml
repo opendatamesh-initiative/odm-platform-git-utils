@@ -6,9 +6,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.opendatamesh</groupId>
-    <artifactId>odm-platform-git-utils</artifactId>
+    <artifactId>git-utils</artifactId>
     <version>1.0.0</version>
-    <url>https://github.com/opendatamesh-initiative/odm-platform-git-utils</url>
+    <url>https://github.com/opendatamesh-initiative/git-utils</url>
     <packaging>jar</packaging>
 
     <name>ODM Platform Git Utils</name>
@@ -29,16 +29,16 @@
     </licenses>
 
     <scm>
-        <connection>scm:git:git@github.com:opendatamesh-initiative/odm-platform-git-utils</connection>
-        <developerConnection>scm:git:git@github.com:opendatamesh-initiative/odm-platform-git-utils</developerConnection>
-        <url>https://github.com/opendatamesh-initiative/odm-platform-git-utils</url>
+        <connection>scm:git:git@github.com:opendatamesh-initiative/git-utils</connection>
+        <developerConnection>scm:git:git@github.com:opendatamesh-initiative/git-utils</developerConnection>
+        <url>https://github.com/opendatamesh-initiative/git-utils</url>
     </scm>
 
     <distributionManagement>
         <repository>
             <id>github</id>
             <name>GitHub Packages</name>
-            <url>https://maven.pkg.github.com/opendatamesh-initiative/odm-platform-git-utils</url>
+            <url>https://maven.pkg.github.com/opendatamesh-initiative/git-utils</url>
         </repository>
     </distributionManagement>
 

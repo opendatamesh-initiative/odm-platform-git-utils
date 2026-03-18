@@ -1,4 +1,4 @@
-name: odm-platform-git-utils Release (Publish Maven)
+name: git-utils Release (Publish Maven)
 
 on:
   release:
