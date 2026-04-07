@@ -22,6 +22,7 @@ import org.springframework.http.HttpHeaders;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Collections;
@@ -407,6 +408,134 @@ class GitOperationImplTest {
         verify(git).add();
         verify(addCommand).addFilepattern("f.txt");
         verify(addCommand).call();
+    }
+
+    // --- add (AddMode) ---
+
+    @Test
+    void whenAddAllModeThenAddFilepatternDot(@TempDir Path tempDir) throws Exception {
+        File repoDir = tempDir.toFile();
+        when(gitFactory.open(repoDir)).thenReturn(git);
+        when(git.add()).thenReturn(addCommand);
+        when(addCommand.addFilepattern(anyString())).thenReturn(addCommand);
+
+        sut.add(repoDir, AddMode.ALL);
+
+        verify(gitFactory).open(repoDir);
+        verify(git).add();
+        verify(addCommand).addFilepattern(".");
+        verify(addCommand).call();
+        verify(addCommand, never()).setUpdate(true);
+        verify(addCommand, never()).setAll(false);
+    }
+
+    @Test
+    void whenAddTrackedOnlyModeThenSetUpdateAndFilepatternDot(@TempDir Path tempDir) throws Exception {
+        File repoDir = tempDir.toFile();
+        when(gitFactory.open(repoDir)).thenReturn(git);
+        when(git.add()).thenReturn(addCommand);
+        when(addCommand.setUpdate(true)).thenReturn(addCommand);
+        when(addCommand.addFilepattern(anyString())).thenReturn(addCommand);
+
+        sut.add(repoDir, AddMode.TRACKED_ONLY);
+
+        verify(addCommand).setUpdate(true);
+        verify(addCommand).addFilepattern(".");
+        verify(addCommand).call();
+    }
+
+    @Test
+    void whenAddNoDeletionsModeThenSetAllFalseAndFilepatternDot(@TempDir Path tempDir) throws Exception {
+        File repoDir = tempDir.toFile();
+        when(gitFactory.open(repoDir)).thenReturn(git);
+        when(git.add()).thenReturn(addCommand);
+        when(addCommand.addFilepattern(anyString())).thenReturn(addCommand);
+        when(addCommand.setAll(false)).thenReturn(addCommand);
+
+        sut.add(repoDir, AddMode.NO_DELETIONS);
+
+        verify(addCommand).addFilepattern(".");
+        verify(addCommand).setAll(false);
+        verify(addCommand).call();
+    }
+
+    @Test
+    void whenAddAllThenSameAsAddAllMode(@TempDir Path tempDir) throws Exception {
+        File repoDir = tempDir.toFile();
+        when(gitFactory.open(repoDir)).thenReturn(git);
+        when(git.add()).thenReturn(addCommand);
+        when(addCommand.addFilepattern(anyString())).thenReturn(addCommand);
+
+        sut.addAll(repoDir);
+
+        verify(addCommand).addFilepattern(".");
+        verify(addCommand).call();
+    }
+
+    @Test
+    void whenAddThrowsGitAPIExceptionThenWrapInGitOperationException(@TempDir Path tempDir) throws Exception {
+        File repoDir = tempDir.toFile();
+        when(gitFactory.open(repoDir)).thenReturn(git);
+        when(git.add()).thenReturn(addCommand);
+        when(addCommand.addFilepattern(anyString())).thenReturn(addCommand);
+        when(addCommand.call()).thenThrow(new RefNotFoundException("add failed"));
+
+        assertThatThrownBy(() -> sut.add(repoDir, AddMode.ALL))
+                .isInstanceOf(GitOperationException.class)
+                .hasMessageContaining("add")
+                .hasMessageContaining("Failed to stage changes");
+    }
+
+    /**
+     * Uses a real JGit repository: TRACKED_ONLY stages the tracked change but
+     * leaves the untracked file unstaged.
+     */
+    @Test
+    void whenAddTrackedOnlyWithRealRepoThenUntrackedRemainsUnstaged(@TempDir Path tempDir) throws Exception {
+        File repoRoot = tempDir.toFile();
+        try (Git localGit = Git.init().setDirectory(repoRoot).setInitialBranch("main").call()) {
+            Path tracked = tempDir.resolve("tracked.txt");
+            Files.writeString(tracked, "v1");
+            localGit.add().addFilepattern("tracked.txt").call();
+            localGit.commit().setMessage("init").call();
+            Files.writeString(tracked, "v2");
+            Files.writeString(tempDir.resolve("untracked.txt"), "new");
+        }
+
+        GitOperationImpl realSut = new GitOperationImpl(credential, new JGitFactory());
+        realSut.add(repoRoot, AddMode.TRACKED_ONLY);
+
+        try (Git openedRepo = Git.open(repoRoot)) {
+            org.eclipse.jgit.api.Status st = openedRepo.status().call();
+            assertThat(st.getModified()).doesNotContain("tracked.txt");
+            assertThat(st.getUntracked()).contains("untracked.txt");
+        }
+    }
+
+    /**
+     * Uses a real JGit repository: NO_DELETIONS does not record a deletion of a
+     * tracked file in the index.
+     */
+    @Test
+    void whenAddNoDeletionsWithRealRepoThenDeletionNotStaged(@TempDir Path tempDir) throws Exception {
+        File repoRoot = tempDir.toFile();
+        Path tracked = tempDir.resolve("gone.txt");
+        try (Git localGit = Git.init().setDirectory(repoRoot).setInitialBranch("main").call()) {
+            Files.writeString(tracked, "content");
+            localGit.add().addFilepattern("gone.txt").call();
+            localGit.commit().setMessage("init").call();
+            Files.delete(tracked);
+        }
+
+        GitOperationImpl realSut = new GitOperationImpl(credential, new JGitFactory());
+        realSut.add(repoRoot, AddMode.NO_DELETIONS);
+
+        try (Git openedRepo = Git.open(repoRoot)) {
+            org.eclipse.jgit.api.Status st = openedRepo.status().call();
+            // Deletion is not staged: file is still in the index but missing from the
+            // working tree
+            assertThat(st.getMissing()).contains("gone.txt");
+        }
     }
 
     // --- commit ---

@@ -74,6 +74,26 @@ public interface GitOperation {
     void addFiles(File repoDir, List<File> files);
 
     /**
+     * Stages changes in the repository according to the specified mode.
+     *
+     * @param repoDir the local repository root directory
+     * @param mode    the add mode defining which changes to stage
+     * @throws org.opendatamesh.platform.git.exceptions.GitOperationException
+     *         if the add operation fails
+     */
+    void add(File repoDir, AddMode mode);
+
+    /**
+     * Stages all changes (new, modified, and deleted). Same as
+     * {@link #add(File, AddMode)} with {@link AddMode#ALL}.
+     *
+     * @param repoDir the local repository root directory
+     */
+    default void addAll(File repoDir) {
+        add(repoDir, AddMode.ALL);
+    }
+
+    /**
      * Commits the current index to the repository.
      *
      * @param repoDir the local repository root directory

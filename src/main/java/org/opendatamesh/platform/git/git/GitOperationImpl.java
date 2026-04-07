@@ -132,6 +132,37 @@ public class GitOperationImpl implements GitOperation {
     }
 
     @Override
+    public void add(File repoDir, AddMode mode) {
+        if (repoDir == null || !repoDir.exists()) {
+            throw new GitOperationException("add", "Repository directory must exist and cannot be null");
+        }
+        if (mode == null) {
+            throw new GitOperationException("add", "Add mode is required");
+        }
+
+        try (Git git = gitFactory.open(repoDir)) {
+            AddCommand add = git.add();
+            switch (mode) {
+                case ALL:
+                    // Matches git add -A for the working tree
+                    add.addFilepattern(".");
+                    break;
+                case TRACKED_ONLY:
+                    // Matches git add -u
+                    add.setUpdate(true).addFilepattern(".");
+                    break;
+                case NO_DELETIONS:
+                    // Matches git add --ignore-removal .
+                    add.addFilepattern(".").setAll(false);
+                    break;
+            }
+            add.call();
+        } catch (IOException | GitAPIException e) {
+            throw new GitOperationException("add", "Failed to stage changes: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
     public void addFiles(File repoDir, List<File> files) {
         if (repoDir == null || !repoDir.exists()) {
             throw new GitOperationException("addFiles", "Repository directory must exist and cannot be null");
